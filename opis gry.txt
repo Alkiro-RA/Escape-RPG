@@ -1,0 +1,215 @@
+Tytuł roboczy: Escape
+
+Opis projektu: 
+Gra w przeglądarce. Napisana w C# ASP.NET 8.0 z wykorzystaniem Blazor'a. 
+Gra będzie w 2D. Turowy system walki. Walka animowana (na tyle na ile turowy system walki pozwala)  (coś pokemony, albo stare Final Fantasy)
+
+Zarys fabularny:
+- odizolowana wioska w górach
+- wyjście z wioski zostało zablokowane przez wielkiego stwora (np. smoka)
+- z wioski można się wydostać przez system jaskiń na drugą stronę góry (info od starszyzny)
+- stara kopalnia na tyłach osady jest wejściem do jaskiń
+- nie wiadomo gdzie jest to wyjście, trzeba go poszukać
+- znalezienie wyjścia nie będzie łatwe bo pod górą mieszkają potwory (nikt się tam nie zapuszczał)
+- przez wioskę przepływa strumień, więc ludziom nie grozi pragnienie, ale nie mają dostępu do jedzenia
+- truchło potworów ma realną wartość; ludzie je zjadają żeby przeżyć (niejadalne przemdioty mogą być potrzebne do stworzenia ekwipunku/eliksirów etc.)
+- (fajnie żeby było mieć więcej jaskiniowców [konkurencja / tworzenie grupy] ale to chyba za dużo..) 
+- bohater jest nikim wyjątkowym - nigdy się do tego nie przygotowywał
+- gdy wiosce i jemu samemu śmierć zajrzała w oczy postanowił zaryzykować
+- pierwszą broń zdobył od kowala: jakiś kiepski sztylet
+
+Warunkek wygranej:
+    - znalezienie wyjścia
+    - zabicie smoka
+
+Warunek przegranej:
+    - śmierć głodowa wioski
+    - śmierć postaci gracza
+
+Mechaniki / Systemy:
+
+- konta użytkowników
+    - jeden użytkownik, jedna gra
+    - zapis gry przechowywany w bazie danych
+    - po zalogowaniu pobierane są dane o rozgrywce i zapisywane po stronie klienta
+    - przed wylogowaniem / wyjściem z gry stan rozgrywki zostaje zsynchronizowany z bazą danych
+    - co jakiś czas następuje automatyczna synchronizacja 
+
+- gameplay turowy z symulacją upływu czasu:
+    - gra działa w pętli czekając na input użytkownika, w interwałach np. 1 sek.
+    - podczas walki i w osadzie "zegar" się zatrzymuje (głód nie spada)
+
+- śmierć głodowa wioski
+    - parametr wskazujący zapasy jedzenia wioski
+    - upływ czasu go zmniejsza; jeśli spadnie do zera = gameover 
+    - zbieranie mięsa z potworów w labiryncie uzupełnia zapasy 
+
+- mapa labiryntu
+    - odkrywanie labiryntu jest odwzorowywane na mapie 
+    - mapę można zobaczyć w każdym momencie
+    - gdy mapa jest włączona, nie można sterować postacią
+
+- wyprawy do labiryntu
+    - potwory nie dropią złota, tylko przedmioty
+    - wyprawę można zakończyć w każdym momencie, za wyjątkiem walki (można spróbować ucieć z walki [% szansy na sukces])
+    - wyprawa kończy się podsumowaniem: 
+        - wypisanie lootu, zdobytego doświadczenia
+        - konwersja "jedzenia" na złoto (wioska odkupuje jedzenie z potworów)
+        - zaktualizowanie "głodu w wiosce"
+
+- postać gracza
+    - poziom postaci
+        - daje płaski bonus do wszystkich atrybutów (np. + 1pkt / poziom)
+        - definiuje maksymalny poziom umiejętności (lvl umiejętności <= lvl postaci ) 
+
+    - atrybuty
+        - witalność (hp)
+        - mądrość (mana)
+        - zwinność (szybkość, uniki etc.)
+        - inteligencja 
+        - zręczność 
+        - celność 
+        - siła 
+
+    - statystyki
+        - poziom atrybutów oraz założony ekwipunek będą miały wpływ na statystyki postaci
+        - lista statystyk:
+            - punkty życia
+                - witalność
+            - punkty many
+                - mądrość
+            - punkty pancerza 
+                - pancerz
+                - zaklęcia
+            - obrona fizyczna
+                - pancerz 
+                - witalność
+            - obrona magiczna
+                - pancerz
+                - mądrość
+            - moc fizycznego ataku
+                - siła
+                - zręczność
+            - moc magicznego ataku
+                - inteligencja
+            - szansa na trafienie
+                - celność
+            - szansa na atak krytyczny
+                - zręczność
+                - celność
+            - szansa na sparowanie
+                - zręczność
+            - szansa na blok
+                - siła
+            - szansa na unik
+                - zwinność
+
+                
+    - umiejętności
+        - podczas walki postać korzysta z różnych umiejętności by walczyć 
+        - używanie umiejętności ma szanse dać postaci pkt. doświadczenia danego rodzaju (np. walki dystansowej)
+        - zdobycie nowego poziomu umiejętności daje bonusy do statysyk i może oblokować nowe zdolności do wykorzystania w walce
+        - lista umiejętności:  
+            - przyjmowanie ciosów 
+                - witalność (++)
+            - czarowanie defensywne 
+                - mądrość (++)
+                - inteligencja (+)
+            - czarowanie ofensywne 
+                - inteligencja (++) 
+                - mądrość (+)
+            - walka bronią jednoręczną 
+                - zręczność (++)
+                - siła (+)
+                - celność (+)
+                - zwinność (+)
+            - walka bronią dystansową
+                - celność (++)
+                - zręczność (+)
+                - siła (+)
+            - walka bronią dwuręczną
+                - siła (++)
+                - zręczność (++)
+            - walka dwoma brońmi
+                - zręczność (++)
+                - siła (+)
+                - celność (+)
+            - blokowanie tarczą
+                - siła (+)
+                - witalność (+)
+            - parowanie
+                - zręczność (+)
+                - zwinność (+)
+            - uniki 
+                - celność (+)
+                - zwinność (+)
+
+    - zdolności 
+        - aktywne zdolności do wykorzystania w walce
+        - odblokowanie zdolności wymaga osięgnięcia danego poziomu jednego lub wielu umiejętności
+        - każda zdolność będzie posiadać czas odnowienia (min. 1 tura), tak aby nie dało się spamić najsilniejszym atakiem
+
+    - ekwipunek
+        - wyposażenie postaci
+            - prawa ręka
+            - lewa ręka
+            - głowa
+            - korpus
+            - ręce
+            - nogi       
+        - plecak postaci
+            - loot z potworów
+            - przedmioty użytkowe (usable)
+                - do wykorzystania w walce (np. potki)
+
+
+- drzewko zdolności (na podstawie umiejętności)
+
+- model walki (rozpisz hipotetyczna walke)
+    - perspektywa 
+        - z pierwszej osoby
+        - jak ekran walki pokemonów, ale kamera jest przed postacią 
+        - animowany ruch bronią, a naszej postaci nie musimy ruszać
+    - opis hipotetycznej walki:
+        - gracz wchodzi w aggro range przeciwnika
+        - domyślny ekran mapy zostaje zasłonięty nowym (panel nawigacyjny pozostaje bez zmian)
+        - nowy ekran jest podzielony na trzy sekcje:
+            - sekcja górna
+                - na nim animowana jest walka 
+                - według opisanej perspektywy
+            - sekcja środkowa
+                - tu dzieje się sterowanie walką
+                - za pomocą przycisków steruje się działaniami postaci
+                - przyciski mogą się rozwijać dając dostęp do nowych opcji
+            - sekcja dolna
+                - historia walki / log walki 
+        - opcje walki do wyboru:
+            - atakuj
+            - zaklęcia
+            - zdolności
+            - przedmioty
+            - inne
+        - po wybraniu "zaklęcia", "zdolności" lub "przedmioty":
+            - opcja 1
+            - opcja 2
+            - opcja 3
+            - opcja 4
+            - anuluj
+        - po wybraniu "inne"
+            - krok do przodu
+            - krok do tyłu
+            - zmień broń
+            - uciekaj
+            - anuluj
+        - 
+
+
+
+
+
+Dodatkowe:
+- pułaki, np. kolce albo dziury. (spownolnienie tempa gry, chodzisz po niebezpiecznym, nieznanym miejscu) 
+- mechaniki ujawniające pułaki 
+- widoczni przeciwnicy z aggro range (możesz się przygotować / unikać walki)
+
+
